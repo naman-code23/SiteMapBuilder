@@ -1,0 +1,105 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <title>Site Map Visualization</title>
+    <script src="https://cdn.jsdelivr.net/npm/echarts@5.1.2/dist/echarts.min.js"></script>
+</head>
+<body>
+    <div id="main" style="width: 100%; height: 1200px;"></div>
+    <script>
+        var chartDom = document.getElementById('main');
+        var myChart = echarts.init(chartDom);
+        var option;
+
+        fetch('tree.json')
+            .then(response => response.json())
+            .then(data => {
+                function formatTreeData(node) {
+                    let formattedNode = {
+                        name: node.name,
+                        url: node.url,
+                        clickCount: 0
+                    };
+                    if (node.children && node.children.length > 0) {
+                        formattedNode.children = node.children.map(formatTreeData);
+                    }
+                    return formattedNode;
+                }
+
+                var formattedData = formatTreeData(data);
+
+                function countNodes(node) {
+                    let count = 1;
+                    if (node.children) {
+                        node.children.forEach(child => {
+                            count += countNodes(child);
+                        });
+                    }
+                    return count;
+                }
+
+                let totalNodes = countNodes(formattedData);
+                let nodeDistance = Math.max(20, Math.min(50, 800 / totalNodes));
+
+                option = {
+                    tooltip: {
+                        trigger: 'item',
+                        triggerOn: 'mousemove',
+                        formatter: function(params) {
+                            return params.data.name + '<br/>' + (params.data.url || 'No URL');
+                        }
+                    },
+                    series: [
+                        {
+                            type: 'tree',
+                            data: [formattedData],
+                            top: '5%',
+                            left: '7%',
+                            bottom: '5%',
+                            right: '20%',
+                            symbolSize: 7,
+                            label: {
+                                position: 'left',
+                                verticalAlign: 'middle',
+                                align: 'right',
+                                fontSize: 9
+                            },
+                            leaves: {
+                                label: {
+                                    position: 'right',
+                                    verticalAlign: 'middle',
+                                    align: 'left'
+                                }
+                            },
+                            expandAndCollapse: true,
+                            animationDuration: 550,
+                            animationDurationUpdate: 750,
+                            initialTreeDepth: 2,
+                            layout: 'orthogonal',
+                            orient: 'LR',
+                            nodeGap: nodeDistance
+                        }
+                    ]
+                };
+
+                myChart.setOption(option);
+
+                myChart.on('click', function(params) {
+                    params.data.clickCount = (params.data.clickCount || 0) + 1;
+                    if (params.data.url && params.data.clickCount % 2 !== 0) {
+                        window.open(params.data.url, '_blank');
+                    }
+                });
+            })
+            .catch(error => {
+                console.error('Error loading or parsing the JSON file:', error);
+                document.getElementById('main').innerHTML = 'Error loading data. Check the console for details.';
+            });
+
+        window.addEventListener('resize', function() {
+            myChart.resize();
+        });
+    </script>
+</body>
+</html>

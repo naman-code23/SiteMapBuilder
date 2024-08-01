@@ -1,0 +1,10 @@
+{
+  "name": "Cut the knot",
+  "url": "https://gobyexample.com/",
+  "children": [
+    {
+      "name": "Go by Example",
+      "url": "https://gobyexample.com/"
+    }
+  ]
+}
