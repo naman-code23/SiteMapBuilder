@@ -6,12 +6,14 @@ import (
 )
 
 func Serve() {
-	//change directory location
-	f := http.Dir("index.html")
-	fs := http.FileServer(f)
+	// directory where index.html is located
+	dir := "D:/SiteVisualization/"
+
+	fs := http.FileServer(http.Dir(dir))
 	http.Handle("/", fs)
+
 	err := http.ListenAndServe(":8080", nil)
 	if err != nil {
-		log.Fatal(err)
+		log.Fatal("ListenAndServe: ", err)
 	}
 }

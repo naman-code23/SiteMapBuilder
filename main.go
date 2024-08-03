@@ -47,7 +47,8 @@ func main() {
 
 	jsonData, err := json.MarshalIndent(rootNode, "", "  ")
 	handleError(err)
-	err = os.WriteFile("tree.json", jsonData, 0644)
+	// path to save the json file and where index.html is located
+	err = os.WriteFile("D:/SiteVisualization/tree.json", jsonData, 0644)
 	handleError(err)
 	fmt.Println("Active on :8080")
 	fmt.Println("Time taken: ", time.Since(start))
